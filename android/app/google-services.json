@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1052993185050",
+    "project_id": "astramarkets-a002d",
+    "storage_bucket": "astramarkets-a002d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1052993185050:android:c000c3f8d8b68ba81f78a3",
+        "android_client_info": {
+          "package_name": "com.example.retailscanner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwjx0WOkYdAUySbvPaavpLA_UpDLb5uHA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
