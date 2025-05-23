@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:retailscanner/core/constants/constants.dart';
+import 'package:retailscanner/providers/scan_provider.dart';
 import 'package:retailscanner/widgets/custom_app_bar.dart';
 
 class SupDetailScreen extends StatelessWidget {
@@ -7,6 +9,7 @@ class SupDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scanProvider = Provider.of<ScanProvider>(context);
     return Scaffold(
       appBar: const CustomAppBar(
         title: 'Worker Details',
@@ -33,6 +36,7 @@ class SupDetailScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
+              onChanged: (val) => scanProvider.updateSupervisorName(val),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -43,6 +47,7 @@ class SupDetailScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
+              onChanged: (val) => scanProvider.updateWorkerName(val),
             ),
             const SizedBox(height: 20),
             Row(
@@ -57,6 +62,7 @@ class SupDetailScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
+                    onChanged: (val) => scanProvider.updateShelfNo(val),
                   ),
                 ),
                 const SizedBox(width: 20),
@@ -69,6 +75,7 @@ class SupDetailScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
+                    onChanged: (val) => scanProvider.updateZoneNo(val),
                   ),
                 ),
               ],

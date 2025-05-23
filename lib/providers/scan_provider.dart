@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class ScanProvider with ChangeNotifier {
@@ -9,6 +10,8 @@ class ScanProvider with ChangeNotifier {
   String shelfNo = '';
   String zoneNo = '';
   String quantity = '';
+  String supervisorName = '';
+  String workerName = '';
 
   void updateScannedData({
     required String product,
@@ -43,6 +46,16 @@ class ScanProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void updateSupervisorName(String name) {
+    supervisorName = name;
+    notifyListeners();
+  }
+
+  void updateWorkerName(String name) {
+    workerName = name;
+    notifyListeners();
+  }
+
   void clear() {
     product = '';
     itemNumber = '';
@@ -52,6 +65,8 @@ class ScanProvider with ChangeNotifier {
     barCode = '';
     shelfNo = '';
     zoneNo = '';
+    supervisorName = '';
+    workerName = '';
     notifyListeners();
   }
 
@@ -62,4 +77,27 @@ class ScanProvider with ChangeNotifier {
         'packOf': packOf,
         'quantity': quantity,
       };
+
+  Future<void> saveToFirestore() async {
+    if (workerName.isEmpty) return;
+
+    final docRef = FirebaseFirestore.instance
+        .collection('Record')
+        .doc(workerName)
+        .collection('Scans')
+        .doc();
+
+    await docRef.set({
+      'product': product,
+      'itemNumber': itemNumber,
+      'barCode': barCode,
+      'price': price,
+      'packOf': packOf,
+      'shelfNo': shelfNo,
+      'zoneNo': zoneNo,
+      'quantity': quantity,
+      'supervisorName': supervisorName,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
 }

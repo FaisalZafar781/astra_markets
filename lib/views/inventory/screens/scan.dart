@@ -90,7 +90,7 @@ class _ScanScreenState extends State<ScanScreen> {
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10))),
               ),
-              onChanged: (val) => scanProvider.updateQuantity(val),
+              onChanged: (val) => scanProvider.updateBarCode(val),
             ),
             const SizedBox(height: 20),
             Row(
@@ -139,11 +139,21 @@ class _ScanScreenState extends State<ScanScreen> {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                      scanProvider.scannedData;
-                      scanProvider.clear();
-                      _qtyController.clear();
-                      _barCodeController.clear();
+                    onPressed: () async {
+                      try {
+                        await scanProvider.saveToFirestore();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Data saved to Firestore')),
+                        );
+                        scanProvider.clear();
+                        _qtyController.clear();
+                        _barCodeController.clear();
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error saving data: $e')),
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,

@@ -95,7 +95,7 @@ class _PriceScanScreenState extends State<PriceScanScreen> {
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10))),
               ),
-              onChanged: (val) => scanProvider.updateQuantity(val),
+              onChanged: (val) => scanProvider.updateBarCode(val),
             ),
             const SizedBox(height: 20),
             Row(
