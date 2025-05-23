@@ -77,17 +77,19 @@ class ScanProvider with ChangeNotifier {
         'packOf': packOf,
         'quantity': quantity,
       };
-
   Future<void> saveToFirestore() async {
     if (workerName.isEmpty) return;
 
-    final docRef = FirebaseFirestore.instance
-        .collection('Record')
-        .doc(workerName)
-        .collection('Scans')
-        .doc();
+    final recordRef =
+        FirebaseFirestore.instance.collection('Record').doc(workerName);
 
-    await docRef.set({
+    await recordRef.set({
+      'isExist': 'true',
+    }, SetOptions(merge: true));
+
+    final scanRef = recordRef.collection('Scans').doc();
+
+    await scanRef.set({
       'product': product,
       'itemNumber': itemNumber,
       'barCode': barCode,

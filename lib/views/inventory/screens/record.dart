@@ -1,88 +1,53 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:retailscanner/core/constants/constants.dart';
 
-class RecordScreen extends StatelessWidget {
+class RecordScreen extends StatefulWidget {
   const RecordScreen({super.key});
 
-  final List<Map<String, String>> dummyData = const [
-    {
-      'product': '0200203X',
-      'description': 'KRAFT',
-      'packSize': '72',
-      'counted': '1',
-    },
-    {
-      'product': '06060202X',
-      'description': 'SHEBA',
-      'packSize': '1',
-      'counted': '2',
-    },
-    {
-      'product': '03030501X',
-      'description': 'TWIX',
-      'packSize': '1',
-      'counted': '41',
-    },
-    {
-      'product': '0200203X',
-      'description': 'KRAFT',
-      'packSize': '72',
-      'counted': '1',
-    },
-    {
-      'product': '06060202X',
-      'description': 'SHEBA',
-      'packSize': '1',
-      'counted': '2',
-    },
-    {
-      'product': '03030501X',
-      'description': 'TWIX',
-      'packSize': '1',
-      'counted': '41',
-    },
-    {
-      'product': '0200203X',
-      'description': 'KRAFT',
-      'packSize': '72',
-      'counted': '1',
-    },
-    {
-      'product': '06060202X',
-      'description': 'SHEBA',
-      'packSize': '1',
-      'counted': '2',
-    },
-    {
-      'product': '03030501X',
-      'description': 'TWIX',
-      'packSize': '1',
-      'counted': '41',
-    },
-    {
-      'product': '0200203X',
-      'description': 'KRAFT',
-      'packSize': '72',
-      'counted': '1',
-    },
-    {
-      'product': '06060202X',
-      'description': 'SHEBA',
-      'packSize': '1',
-      'counted': '2',
-    },
-    {
-      'product': '03030501X',
-      'description': 'TWIX',
-      'packSize': '1',
-      'counted': '41',
-    },
-  ];
+  @override
+  State<RecordScreen> createState() => _RecordScreenState();
+}
+
+class _RecordScreenState extends State<RecordScreen> {
+  Map<String, List<Map<String, dynamic>>> recordsByWorker = {};
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchRecords();
+  }
+
+  Future<void> fetchRecords() async {
+    final snapshot =
+        await FirebaseFirestore.instance.collection('Record').get();
+
+    final Map<String, List<Map<String, dynamic>>> data = {};
+
+    for (var workerDoc in snapshot.docs) {
+      final workerName = workerDoc.id;
+
+      final scansSnapshot = await workerDoc.reference
+          .collection('Scans')
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      data[workerName] = scansSnapshot.docs.map((doc) {
+        return doc.data();
+      }).toList();
+    }
+
+    setState(() {
+      recordsByWorker = data;
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightGreen,
+      backgroundColor: AppColors.white,
       appBar: AppBar(
         title: const Text(
           'Recorded Items',
@@ -96,28 +61,49 @@ class RecordScreen extends StatelessWidget {
         backgroundColor: AppColors.primary,
         iconTheme: const IconThemeData(color: AppColors.white),
       ),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width * 1.5,
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              _buildHeaderRow(),
-              const Divider(),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: dummyData.length,
-                  itemBuilder: (context, index) {
-                    final item = dummyData[index];
-                    return _buildDataRow(index + 1, item);
-                  },
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : recordsByWorker.isEmpty
+              ? const Center(child: Text('No records found.'))
+              : ListView(
+                  children: recordsByWorker.entries.map((entry) {
+                    final worker = entry.key;
+                    final items = entry.value;
+
+                    return Container(
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Colors.grey,
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: ExpansionTile(
+                        title: Text(
+                          worker,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        children: [
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Column(
+                              children: [
+                                _buildHeaderRow(),
+                                ...items.asMap().entries.map((entry) {
+                                  final index = entry.key;
+                                  final item = entry.value;
+                                  return _buildDataRow(index + 1, item);
+                                }),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -125,20 +111,37 @@ class RecordScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       color: AppColors.primary,
-      child: Row(
-        children: const [
+      child: const Row(
+        children: [
           _HeaderCell(text: '#'),
+          _HeaderCell(text: 'Item No'),
+          SizedBox(width: 20),
           _HeaderCell(text: 'Product'),
-          _HeaderCell(text: 'Description'),
-          _HeaderCell(text: 'PackSize'),
-          _HeaderCell(text: 'Counted'),
+          SizedBox(width: 20),
+          _HeaderCell(text: 'Barcode'),
+          _HeaderCell(text: 'Price'),
+          _HeaderCell(text: 'Pack'),
+          _HeaderCell(text: 'Qty'),
+          _HeaderCell(text: 'Shelf'),
+          _HeaderCell(text: 'Zone'),
+          _HeaderCell(text: 'Supervisor'),
+          _HeaderCell(text: 'Time'),
           _HeaderCell(text: 'Delete'),
         ],
       ),
     );
   }
 
-  Widget _buildDataRow(int index, Map<String, String> item) {
+  Widget _buildDataRow(int index, Map<String, dynamic> item) {
+    final timestamp = item['timestamp'];
+    String formattedTime = '';
+
+    if (timestamp is Timestamp) {
+      final date = timestamp.toDate();
+      formattedTime =
+          '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
@@ -150,10 +153,18 @@ class RecordScreen extends StatelessWidget {
       child: Row(
         children: [
           _DataCell(text: '$index'),
+          _DataCell(text: item['itemNumber'] ?? ''),
+          const SizedBox(width: 20),
           _DataCell(text: item['product'] ?? ''),
-          _DataCell(text: item['description'] ?? ''),
-          _DataCell(text: item['packSize'] ?? ''),
-          _DataCell(text: item['counted'] ?? ''),
+          const SizedBox(width: 20),
+          _DataCell(text: item['barCode'] ?? ''),
+          _DataCell(text: item['price'] ?? ''),
+          _DataCell(text: item['packOf'] ?? ''),
+          _DataCell(text: item['quantity'] ?? ''),
+          _DataCell(text: item['shelfNo'] ?? ''),
+          _DataCell(text: item['zoneNo'] ?? ''),
+          _DataCell(text: item['supervisorName'] ?? ''),
+          _DataCell(text: formattedTime),
           const _DeleteCell(),
         ],
       ),
@@ -192,6 +203,8 @@ class _DataCell extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         text,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
         style: const TextStyle(fontSize: 16),
       ),
     );
@@ -206,9 +219,9 @@ class _DeleteCell extends StatelessWidget {
     return Container(
       width: 100,
       alignment: Alignment.center,
-      child: TextButton(
-        onPressed: null, // Will be connected to delete logic later
-        child: const Text(
+      child: const TextButton(
+        onPressed: null,
+        child: Text(
           'Delete',
           style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
         ),
