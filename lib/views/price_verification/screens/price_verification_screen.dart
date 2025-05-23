@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:retailscanner/core/constants/constants.dart';
 
 class PriceVerificationScreen extends StatelessWidget {
+  const PriceVerificationScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

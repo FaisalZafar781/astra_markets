@@ -10,9 +10,11 @@ import 'package:retailscanner/widgets/custom_app_bar.dart';
 class BottomTabBar extends StatelessWidget {
   final List<Widget> _pages = [
     const InventoryScreen(),
-    PriceVerificationScreen(),
-    SettingsScreen(),
+    const PriceVerificationScreen(),
+    const SettingsScreen(),
   ];
+
+  BottomTabBar({super.key});
 
   @override
   Widget build(BuildContext context) {
